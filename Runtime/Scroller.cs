@@ -1,12 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+
 using TMPro;
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace UIS {
-
     /// <summary>
     /// Load direction
     /// </summary>
@@ -21,7 +22,6 @@ namespace UIS {
     /// Infinite scroller
     /// </summary>
     public class Scroller : MonoBehaviour, IDropHandler {
-
         /// <summary>
         /// Velocity for scroll to function
         /// </summary>
@@ -367,6 +367,9 @@ namespace UIS {
             } else {
                 UpdateHorizontal();
             }
+
+            // It breaks any size set by scroller.OnHeight event and paddings
+            UpdateItemsHeightBasedOnSize();
         }
 
         /// <summary>
@@ -376,32 +379,39 @@ namespace UIS {
             if (_count == 0 || !_isInited) {
                 return;
             }
+
             if (_isComplexList) {
                 var topPosition = _content.anchoredPosition.y - ItemSpacing;
                 if (topPosition <= 0f && _rects[0].anchoredPosition.y < -TopPadding) {
                     InitData(_count);
                     return;
                 }
+
                 if (topPosition < 0f) {
                     return;
                 }
+
                 if (!_positions.ContainsKey(_previousPosition) || !_heights.ContainsKey(_previousPosition)) {
                     return;
                 }
+
                 var itemPosition = Mathf.Abs(_positions[_previousPosition]) + _heights[_previousPosition];
                 var position = (topPosition > itemPosition) ? _previousPosition + 1 : _previousPosition - 1;
                 if (position < 0 || _scroll.velocity.y == 0.0f) {
                     return;
                 }
+
                 if (position > _previousPosition) {
                     if (position - _previousPosition > 1) {
                         position = _previousPosition + 1;
                     }
+
                     var newPosition = position % _views.Length;
                     newPosition--;
                     if (newPosition < 0) {
                         newPosition = _views.Length - 1;
                     }
+
                     var index = position + _views.Length - 1;
                     if (index < _count) {
                         var pos = _rects[newPosition].anchoredPosition;
@@ -417,6 +427,7 @@ namespace UIS {
                     if (_previousPosition - position > 1) {
                         position = _previousPosition - 1;
                     }
+
                     var newIndex = position % _views.Length;
                     var pos = _rects[newIndex].anchoredPosition;
                     pos.y = _positions[position];
@@ -427,6 +438,7 @@ namespace UIS {
                     _views[newIndex].name = position.ToString();
                     OnFill(position, _views[newIndex]);
                 }
+
                 _previousPosition = position;
             } else {
                 var topPosition = _content.anchoredPosition.y - ItemSpacing;
@@ -436,6 +448,7 @@ namespace UIS {
                     if (i < 0 || i > _count - 1 || _rects == null || !_isInited) {
                         continue;
                     }
+
                     var position = _rects[index].anchoredPosition;
                     var size = _rects[index].sizeDelta;
                     position.y = _positions[i];
@@ -458,32 +471,39 @@ namespace UIS {
             if (_count == 0 || !_isInited) {
                 return;
             }
+
             if (_isComplexList) {
                 var _leftPosition = _content.anchoredPosition.x * -1f - ItemSpacing;
                 if (_leftPosition <= 0f && _rects[0].anchoredPosition.x < -LeftPadding) {
                     InitData(_count);
                     return;
                 }
+
                 if (_leftPosition < 0f) {
                     return;
                 }
+
                 if (!_positions.ContainsKey(_previousPosition) || !_widths.ContainsKey(_previousPosition)) {
                     return;
                 }
+
                 var itemPosition = Mathf.Abs(_positions[_previousPosition]) + _widths[_previousPosition];
                 var position = (_leftPosition > itemPosition) ? _previousPosition + 1 : _previousPosition - 1;
                 if (position < 0 || _scroll.velocity.x == 0.0f) {
                     return;
                 }
+
                 if (position > _previousPosition) {
                     if (position - _previousPosition > 1) {
                         position = _previousPosition + 1;
                     }
+
                     var newPosition = position % _views.Length;
                     newPosition--;
                     if (newPosition < 0) {
                         newPosition = _views.Length - 1;
                     }
+
                     var index = position + _views.Length - 1;
                     if (index < _count) {
                         var pos = _rects[newPosition].anchoredPosition;
@@ -499,6 +519,7 @@ namespace UIS {
                     if (_previousPosition - position > 1) {
                         position = _previousPosition - 1;
                     }
+
                     var newIndex = position % _views.Length;
                     var pos = _rects[newIndex].anchoredPosition;
                     pos.x = _positions[position];
@@ -509,6 +530,7 @@ namespace UIS {
                     _views[newIndex].name = position.ToString();
                     OnFill(position, _views[newIndex]);
                 }
+
                 _previousPosition = position;
             } else {
                 var _leftPosition = _content.anchoredPosition.x * -1f - ItemSpacing;
@@ -518,6 +540,7 @@ namespace UIS {
                     if (i < 0 || i > _count - 1 || _rects == null || !_isInited) {
                         continue;
                     }
+
                     var position = _rects[index].anchoredPosition;
                     var size = _rects[index].sizeDelta;
                     position.x = _positions[i];
@@ -544,7 +567,8 @@ namespace UIS {
                 var pos = (Type == 0) ? vector.y : vector.x;
                 var index = Mathf.RoundToInt(_count * (1.0f - pos));
                 //ScrollTo(index);
-            }            
+            }
+
             if (Type == 0) {
                 ScrollChangeVertical();
             } else {
@@ -561,6 +585,7 @@ namespace UIS {
             if (_views == null) {
                 return;
             }
+
             var z = 0f;
             var isScrollable = _scroll.verticalNormalizedPosition != 1f && _scroll.verticalNormalizedPosition != 0f;
             var y = _content.anchoredPosition.y;
@@ -573,6 +598,7 @@ namespace UIS {
             } else {
                 z = y;
             }
+
             if (y < -LabelOffset && IsPullTop) {
                 TopLabel.gameObject.SetActive(true);
                 TopLabel.text = TopPullLabel;
@@ -583,6 +609,7 @@ namespace UIS {
             } else {
                 TopLabel.gameObject.SetActive(false);
             }
+
             if (z > LabelOffset && IsPullBottom) {
                 BottomLabel.gameObject.SetActive(true);
                 BottomLabel.text = BottomPullLabel;
@@ -604,6 +631,7 @@ namespace UIS {
             if (_views == null) {
                 return;
             }
+
             var z = 0f;
             var isScrollable = _scroll.horizontalNormalizedPosition != 1f && _scroll.horizontalNormalizedPosition != 0f;
             var x = _content.anchoredPosition.x;
@@ -616,6 +644,7 @@ namespace UIS {
             } else {
                 z = x;
             }
+
             if (x > LabelOffset && IsPullLeft) {
                 LeftLabel.gameObject.SetActive(true);
                 LeftLabel.text = LeftPullLabel;
@@ -626,6 +655,7 @@ namespace UIS {
             } else {
                 LeftLabel.gameObject.SetActive(false);
             }
+
             if (z < -LabelOffset && IsPullRight) {
                 RightLabel.gameObject.SetActive(true);
                 RightLabel.text = RightPullLabel;
@@ -658,6 +688,7 @@ namespace UIS {
             } else if (_isCanLoadDown) {
                 OnPull(ScrollerDirection.Bottom);
             }
+
             _isCanLoadUp = false;
             _isCanLoadDown = false;
         }
@@ -671,6 +702,7 @@ namespace UIS {
             } else if (_isCanLoadRight) {
                 OnPull(ScrollerDirection.Right);
             }
+
             _isCanLoadLeft = false;
             _isCanLoadRight = false;
         }
@@ -685,6 +717,7 @@ namespace UIS {
                 Debug.LogWarning("Can't init empty list!");
                 return;
             }
+
             _isInited = true;
             if (Type == 0) {
                 InitVertical(count, isOtherSide);
@@ -713,10 +746,12 @@ namespace UIS {
                 if (i + 1 > _count) {
                     continue;
                 }
+
                 var index = i;
                 if (isOtherSide) {
                     index = (count >= _views.Length) ? count - _views.Length + i : i;
                 }
+
                 pos = _rects[i].anchoredPosition;
                 pos.y = _positions[index];
                 pos.x = 0f;
@@ -749,10 +784,12 @@ namespace UIS {
                 if (i + 1 > _count) {
                     continue;
                 }
+
                 var index = i;
                 if (isOtherSide) {
                     index = (count >= _views.Length) ? count - _views.Length + i : i;
                 }
+
                 pos = _rects[i].anchoredPosition;
                 pos.x = _positions[index];
                 pos.y = 0f;
@@ -788,6 +825,7 @@ namespace UIS {
                 _positions[i] = -(TopPadding + i * ItemSpacing + result);
                 result += _heights[i];
             }
+
             _offsetData /= count;
             _isComplexList = _offsetData != _heights[0];
             result += TopPadding + BottomPadding + (count == 0 ? 0 : ((count - 1) * ItemSpacing));
@@ -808,6 +846,7 @@ namespace UIS {
                 _positions[i] = LeftPadding + i * ItemSpacing + result;
                 result += _widths[i];
             }
+
             _offsetData /= count;
             _isComplexList = _offsetData != _widths[0];
             result += LeftPadding + RightPadding + (count == 0 ? 0 : ((count - 1) * ItemSpacing));
@@ -824,6 +863,7 @@ namespace UIS {
             if (!_isInited) {
                 return;
             }
+
             if (Type == 0) {
                 ApplyDataToVertical(count, newCount, direction);
             } else {
@@ -842,6 +882,7 @@ namespace UIS {
                 InitData(count);
                 return;
             }
+
             _count = count;
             var height = CalcSizesPositions(count);
             _content.sizeDelta = new Vector2(_content.sizeDelta.x, height);
@@ -851,9 +892,11 @@ namespace UIS {
                 for (var i = 0; i < newCount; i++) {
                     y += _heights[i] + ItemSpacing;
                 }
+
                 pos.y = y;
                 _previousPosition = newCount;
             }
+
             _content.anchoredPosition = pos;
             var topPosition = _content.anchoredPosition.y - ItemSpacing;
             var itemPosition = Mathf.Abs(_positions[_previousPosition]) + _heights[_previousPosition];
@@ -862,16 +905,19 @@ namespace UIS {
                 _previousPosition = 0;
                 position = 1;
             }
+
             if (!_isComplexList) {
                 for (var i = 0; i < _indexes.Length; i++) {
                     _indexes[i] = -1;
                 }
             }
+
             for (var i = 0; i < _views.Length; i++) {
                 var newIndex = position % _views.Length;
                 if (newIndex < 0) {
                     continue;
                 }
+
                 _views[newIndex].SetActive(true);
                 _views[newIndex].name = position.ToString();
                 OnFill(position, _views[newIndex]);
@@ -899,6 +945,7 @@ namespace UIS {
                 InitData(count);
                 return;
             }
+
             _count = count;
             var width = CalcSizesPositions(count);
             _content.sizeDelta = new Vector2(width, _content.sizeDelta.y);
@@ -908,6 +955,7 @@ namespace UIS {
                 for (var i = 0; i < newCount; i++) {
                     x -= _widths[i] + ItemSpacing;
                 }
+
                 pos.x = x;
                 _previousPosition = newCount;
             } else {
@@ -915,8 +963,10 @@ namespace UIS {
                 for (var i = _widths.Count - 1; i >= _widths.Count - newCount; i--) {
                     w += _widths[i] + ItemSpacing;
                 }
+
                 pos.x = -width + w + _container.width;
             }
+
             _content.anchoredPosition = pos;
             var _leftPosition = _content.anchoredPosition.x - ItemSpacing;
             var itemPosition = Mathf.Abs(_positions[_previousPosition]) + _widths[_previousPosition];
@@ -925,16 +975,19 @@ namespace UIS {
                 _previousPosition = 0;
                 position = 1;
             }
+
             if (!_isComplexList) {
                 for (var i = 0; i < _indexes.Length; i++) {
                     _indexes[i] = -1;
                 }
             }
+
             for (var i = 0; i < _views.Length; i++) {
                 var newIndex = position % _views.Length;
                 if (newIndex < 0) {
                     continue;
                 }
+
                 _views[newIndex].SetActive(true);
                 _views[newIndex].name = position.ToString();
                 OnFill(position, _views[newIndex]);
@@ -962,17 +1015,21 @@ namespace UIS {
             } else if (index < 0) {
                 index = 0;
             }
+
             if (index + _views.Length >= _count) {
                 index = _count - _views.Length + AddonViewsCount;
             }
+
             if (index < 0) {
                 index = 0;
-            }            
+            }
+
             for (var i = 0; i < _views.Length; i++) {
                 var position = (index < gap) ? index : index + i - gap;
                 if (i + 1 > _count || position >= _count) {
                     continue;
                 }
+
                 var pos = _rects[i].anchoredPosition;
                 pos.y = _positions[position];
                 _rects[i].anchoredPosition = pos;
@@ -982,11 +1039,13 @@ namespace UIS {
                 } else {
                     size.x = _widths[position];
                 }
+
                 _rects[i].sizeDelta = size;
                 _views[i].SetActive(true);
                 _views[i].name = position.ToString();
                 OnFill(position, _views[i]);
             }
+
             var offset = 0f;
             for (var i = 0; i < index; i++) {
                 if (Type == 0) {
@@ -995,16 +1054,19 @@ namespace UIS {
                     offset -= _widths[i] + ItemSpacing;
                 }
             }
+
             _previousPosition = index - _views.Length;
             if (_previousPosition <= 0) {
                 InitData(_count);
             }
+
             var top = _content.anchoredPosition;
             if (Type == 0) {
                 top.y = offset;
             } else {
                 top.x = offset;
             }
+
             _content.anchoredPosition = top;
             _scroll.velocity = SCROLL_VELOCITY;
         }
@@ -1017,6 +1079,7 @@ namespace UIS {
             if (_views == null || !_isInited) {
                 return;
             }
+
             for (var i = 0; i < _views.Length; i++) {
                 _views[i].SetActive(false);
             }
@@ -1033,6 +1096,7 @@ namespace UIS {
                 RecycleAll();
                 return;
             }
+
             var height = CalcSizesPositions(_count);
             for (var i = 0; i < _views.Length; i++) {
                 if (string.CompareOrdinal(_views[i].name, name) == 0) {
@@ -1055,6 +1119,7 @@ namespace UIS {
                 if (i + 1 > _count) {
                     continue;
                 }
+
                 var index = int.Parse(_views[i].name);
                 if (index < _count) {
                     pos = _rects[i].anchoredPosition;
@@ -1067,6 +1132,7 @@ namespace UIS {
                     } else {
                         size.x = _widths[i];
                     }
+
                     _rects[i].sizeDelta = size;
                 }
             }
@@ -1079,12 +1145,14 @@ namespace UIS {
             if (!_isInited) {
                 return;
             }
+
             for (var i = 0; i < _views.Length; i++) {
                 var showed = i < _count;
                 _views[i].SetActive(showed);
                 if (i + 1 > _count) {
                     continue;
                 }
+
                 var index = int.Parse(_views[i].name);
                 if (index < _count) {
                     OnFill(index, _views[i]);
@@ -1101,10 +1169,12 @@ namespace UIS {
             if (_views == null) {
                 return;
             }
+
             _isInited = false;
             for (var i = _views.Length - 1; i >= 0; i--) {
                 Destroy(_views[i]);
             }
+
             _rects = null;
             _views = null;
             _indexes = null;
@@ -1140,6 +1210,7 @@ namespace UIS {
             if (_views != null) {
                 return;
             }
+
             var childs = _content.transform.childCount;
             if (childs > 0 && !isForceCreate) {
                 _views = new GameObject[childs];
@@ -1154,6 +1225,7 @@ namespace UIS {
                 foreach (var item in _heights.Values) {
                     height += item + ItemSpacing;
                 }
+
                 height /= _heights.Count;
                 var fillCount = Mathf.RoundToInt(_container.height / height) + AddonViewsCount;
                 _views = new GameObject[fillCount];
@@ -1171,6 +1243,7 @@ namespace UIS {
                     _views[i] = clone;
                 }
             }
+
             _indexes = new int[_views.Length];
             _rects = new RectTransform[_views.Length];
             for (var i = 0; i < _views.Length; i++) {
@@ -1186,6 +1259,7 @@ namespace UIS {
             if (_views != null) {
                 return;
             }
+
             var childs = _content.transform.childCount;
             if (childs > 0 && !isForceCreate) {
                 _views = new GameObject[childs];
@@ -1200,6 +1274,7 @@ namespace UIS {
                 foreach (var item in _widths.Values) {
                     width += item + ItemSpacing;
                 }
+
                 width /= _widths.Count;
                 var fillCount = Mathf.RoundToInt(_container.width / width) + AddonViewsCount;
                 _views = new GameObject[fillCount];
@@ -1217,6 +1292,7 @@ namespace UIS {
                     _views[i] = clone;
                 }
             }
+
             _indexes = new int[_views.Length];
             _rects = new RectTransform[_views.Length];
             for (var i = 0; i < _views.Length; i++) {
@@ -1315,6 +1391,27 @@ namespace UIS {
             rect.offsetMin = Vector2.zero;
             rect.anchoredPosition3D = Vector3.zero;
             rightText.SetActive(false);
+        }
+
+        public void UpdateItemsHeightBasedOnSize() {
+            if (_views == null || _views.Length == 0) {
+                return;
+            }
+
+            var totalHeight = 0f;
+            for (var i = 0; i < _views.Length; i++) {
+                if (_views[i].activeSelf) {
+                    if (_views[i].TryGetComponent(out RectTransform rectTransform)) {
+                        totalHeight += rectTransform.sizeDelta.y + ItemSpacing;
+
+                        _heights[i] = (int)rectTransform.sizeDelta.y;
+                    }
+                }
+            }
+
+            if (_content.TryGetComponent(out RectTransform contentRectTransform)) {
+                contentRectTransform.sizeDelta = new Vector2(contentRectTransform.sizeDelta.x, totalHeight);
+            }
         }
     }
 }
