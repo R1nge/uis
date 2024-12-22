@@ -21,7 +21,7 @@ namespace UIS {
     /// <summary>
     /// Infinite scroller
     /// </summary>
-    public class Scroller : MonoBehaviour, IDropHandler {
+    public class Scroller : MonoBehaviour, IBeginDragHandler, IDropHandler {
         /// <summary>
         /// Velocity for scroll to function
         /// </summary>
@@ -368,7 +368,11 @@ namespace UIS {
                 UpdateHorizontal();
             }
 
-            // It breaks any size set by scroller.OnHeight event and paddings
+            CheckDrop();
+        }
+
+        private void LateUpdate() {
+            // It breaks paddings
             UpdateItemsHeightBasedOnSize();
         }
 
@@ -672,6 +676,7 @@ namespace UIS {
         /// Hander on scroller drop pull
         /// </summary>
         public void OnDrop(PointerEventData eventData) {
+            _isDragging = false;
             if (Type == 0) {
                 DropVertical();
             } else {
@@ -1411,6 +1416,26 @@ namespace UIS {
 
             if (_content.TryGetComponent(out RectTransform contentRectTransform)) {
                 contentRectTransform.sizeDelta = new Vector2(contentRectTransform.sizeDelta.x, totalHeight);
+            }
+        }
+
+        private bool _isDragging;
+
+        public void OnBeginDrag(PointerEventData eventData) {
+            _isDragging = true;
+        }
+
+        public void CheckDrop() {
+            if (_isDragging) {
+                if (Input.touchCount > 0) {
+                    Touch touch = Input.GetTouch(0);
+
+                    if (touch.phase == TouchPhase.Ended) {
+                        OnDrop(null);
+                    }
+                } else if (Input.GetMouseButtonUp(0)) {
+                    OnDrop(null);
+                }
             }
         }
     }
